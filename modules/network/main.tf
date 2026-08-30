@@ -15,10 +15,6 @@ resource "aws_subnet" "public_a" {
   cidr_block              = cidrsubnet(var.cidr_block, 8, 0)
   availability_zone       = "ap-southeast-2a"
   map_public_ip_on_launch = true
-
-  tags = {
-    Name = "${var.project}-public-a"
-  }
 }
 
 resource "aws_subnet" "public_b" {
@@ -26,10 +22,6 @@ resource "aws_subnet" "public_b" {
   cidr_block              = cidrsubnet(var.cidr_block, 8, 1)
   availability_zone       = "ap-southeast-2b"
   map_public_ip_on_launch = true
-
-  tags = {
-    Name = "${var.project}-public-b"
-  }
 }
 
 # Create Internet Gateway
