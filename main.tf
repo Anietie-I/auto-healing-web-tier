@@ -9,7 +9,7 @@ module "network" {
 
 # Create load balancer layer
 module "load_balancer" {
-  source             = "./modules/loadbalancer"
+  source             = "./modules/load_balancer"
   project            = var.project
   vpc_id             = module.network.vpc_id
   public_subnet_ids  = module.network.public_subnet_ids
