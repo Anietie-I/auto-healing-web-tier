@@ -178,15 +178,15 @@ Push to Docker Hub
 
 User‑data to pull and run container
 
-Validation
+#Validation
 All must‑have requirements have been met:
 
-Auto‑healing 
+1. Auto‑healing 
 
-Self‑provisioning 
+2. Self‑provisioning 
 
-N+1 capacity 
+3. N+1 capacity 
 
-Static page 
+4. Static page 
 
-Terraform modules 
+5. Terraform modules 
