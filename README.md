@@ -150,16 +150,17 @@ Visit the output DNS:
 
 #Code
 http://<alb_dns_name>
-Assumptions
-Public subnets are acceptable for this exercise
 
-Apache is sufficient for static content
+#Assumptions
+1. Public subnets are acceptable for this exercise
 
-No database or backend required
+2. Apache is sufficient for static content
 
-No private networking required
+3. No database or backend required
 
-No CI/CD pipeline required (optional)
+4. No private networking required
+
+5. No CI/CD pipeline required (optional)
 
 Estimated Monthly Cost (AUD)
 Component	Qty	Cost (AUD)
