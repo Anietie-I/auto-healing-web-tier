@@ -16,3 +16,6 @@ output "public_subnet_ids" {
 output "alb_sg_id" {
   value = module.network.alb_sg_id
 }
+output "target_group_arn" {
+  value = module.load_balancer.target_group_arn
+}
