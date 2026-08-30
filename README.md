@@ -52,6 +52,8 @@ EC2 instances (Amazon Linux 2)
 
 Client → ALB → Target Group → EC2 Instances (ASG)
 
+![Architecture Diagram](auto-healing-architecture.png)
+
 #Key Features 
 1. Auto‑Healing
 Terminating any EC2 instance triggers the ASG to automatically launch a replacement.
