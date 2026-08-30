@@ -4,7 +4,7 @@
 module "network" {
   source = "./modules/network"
   project = var.project
-  cidr_block = var.vpc_cidr_block
+  cidr_block = var.cidr_block
 }
 
 # Create load balancer layer
