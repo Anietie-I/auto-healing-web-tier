@@ -181,12 +181,12 @@ User‑data to pull and run container
 Validation
 All must‑have requirements have been met:
 
-Auto‑healing ✔
+Auto‑healing 
 
-Self‑provisioning ✔
+Self‑provisioning 
 
-N+1 capacity ✔
+N+1 capacity 
 
-Static page ✔
+Static page 
 
-Terraform modules ✔
+Terraform modules 
