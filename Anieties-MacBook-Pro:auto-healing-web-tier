@@ -1,0 +1,8 @@
+-bash: .gitignore: command not found
+Anieties-MacBook-Pro:auto-healing-web-tier anietie$ .terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+modules/*/.terraform/
+modules/*/.terraform.lock.hcl
+

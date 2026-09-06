@@ -1,30 +1,41 @@
-# Root module for auto-healing web tier
+# Providers
+provider "aws" {
+  region = var.region
+}
 
-# Create network layer
+# Network Module
 module "network" {
-  source = "./modules/network"
-  project = var.project
+  source     = "./modules/network"
+  project    = var.project
   cidr_block = var.cidr_block
+
+  # ALB SG comes from load_balancer module
+  alb_sg_id = module.load_balancer.alb_sg_id
 }
 
-# Create load balancer layer
+
+# Load Balancer Module
 module "load_balancer" {
-  source             = "./modules/load_balancer"
-  project            = var.project
-  vpc_id             = module.network.vpc_id
-  public_subnet_ids  = module.network.public_subnet_ids
-  sg_id              = module.network.alb_sg_id
-  port               = var.port
-  health_check_path  = var.health_check_path
+  source            = "./modules/load_balancer"
+  project           = var.project
+  vpc_id            = module.network.vpc_id
+  public_subnet_ids = module.network.public_subnet_ids
+  port              = var.port
+  health_check_path = var.health_check_path
 }
 
-# Create compute layer
+# Compute Module
 module "compute" {
   source            = "./modules/compute"
   project           = var.project
-  ami_id            = var.ami_id
+  vpc_id            = module.network.vpc_id
+  public_subnet_ids = module.network.public_subnet_ids
   instance_type     = var.instance_type
-  sg_name           = module.network.ec2_sg_name
-  subnet_ids        = module.network.public_subnet_ids
-  target_group_arn  = module.load_balancer.target_group_arn
+
+  # From load_balancer module
+  target_group_arn = module.load_balancer.target_group_arn
+  alb_sg_id        = module.load_balancer.alb_sg_id
+
+  # From network module
+  ec2_sg_id = module.network.ec2_sg_id
 }
