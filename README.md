@@ -1,22 +1,25 @@
-#Overview
+Auto‑Healing Web Tier (N+1) — Terraform on AWS
+Overview
 This project implements an auto‑healing, N+1 web tier on AWS using Terraform v1.x.
-The architecture ensures that the application can lose any single VM without downtime, with all infrastructure provisioned via Infrastructure as Code (IaC).
+The architecture ensures the application can lose any single EC2 instance without downtime, with all infrastructure provisioned via Infrastructure as Code (IaC).
 
 The solution uses:
 
-1. AWS Application Load Balancer (ALB)
+AWS Application Load Balancer (ALB)
 
-2. AWS Auto Scaling Group (ASG)
+AWS Auto Scaling Group (ASG)
 
-3. Launch Template (LT)
+Launch Template (LT)
 
-4. Amazon Linux 2 EC2 instances
+Amazon Linux 2 EC2 instances
 
-5. Terraform modules for network, load balancer, and compute
+Terraform modules for network, load balancer, compute, monitoring, and Lambda
 
-6. The system is fully self‑healing, self‑provisioning, and horizontally scalable.
+CloudWatch Alarms + Lambda remediation + SNS notifications
 
-#Why AWS?
+Fully self‑healing, horizontally scalable design
+
+Why AWS?
 AWS was selected because:
 
 It provides first‑class auto‑healing primitives (ASG + LT + ALB health checks)
@@ -27,51 +30,67 @@ ALB + Target Groups offer native health monitoring
 
 EC2 user‑data allows simple provisioning of a static web page
 
-AWS pricing allows the solution to remain under AUD 20/month
+AWS pricing keeps the solution under AUD 20/month
 
-#Architecture Diagram
-Components:
+Architecture Diagram
+Architecture Overview
+![Architecture Diagram](architecture-diagram.png)
 
-VPC (10.0.0.0/16)
 
-Two public subnets (ap-southeast-2a, ap-southeast-2b)
 
-Internet Gateway + route tables
+This diagram illustrates the complete auto‑healing web tier architecture:
 
-Application Load Balancer
+VPC (10.0.0.0/16) with two public subnets
 
-Target Group (HTTP health checks)
+Internet Gateway for inbound HTTPS
 
-Auto Scaling Group (min=2, desired=2, max=3)
+ALB → Target Group → Auto Scaling Group
 
-Launch Template (Apache static page)
+Launch Template defining AMI + user‑data
 
-EC2 instances (Amazon Linux 2)
+CloudWatch Alarms detecting unhealthy instances
 
-#Traffic flow:
+Lambda Auto‑Healing Function terminating and replacing failed EC2 nodes
 
+SNS Topic sending notifications to operations teams
+
+Traffic Flow
 Client → ALB → Target Group → EC2 Instances (ASG)
+CloudWatch → Lambda → ASG → SNS Notifications
 
-![Architecture Diagram](auto-healing-architecture.png)
-
-#Key Features 
+Key Features
 1. Auto‑Healing
-Terminating any EC2 instance triggers the ASG to automatically launch a replacement.
-Health checks ensure only healthy instances receive traffic.
+Terminating any EC2 instance triggers:
+
+ALB health check failure
+
+CloudWatch alarm
+
+Lambda remediation
+
+ASG replacement
+
+SNS notification
+
+Only healthy instances receive traffic.
 
 2. Self‑Provisioning (IaC Only)
-terraform apply → builds the entire stack
+Code
+terraform apply
+Builds the entire stack.
 
-Second terraform apply → no changes (idempotent)
+Running it again:
+
+Code
+terraform apply
+Results in no changes — fully idempotent.
 
 3. N+1 Capacity
-ASG configuration:
-
 Code
 min_size         = 2
 desired_capacity = 2
 max_size         = 3
-This ensures two instances are always running behind the ALB.
+Ensures two instances are always running behind the ALB.
 
 4. Static Web Page
 User‑data installs Apache and serves:
@@ -79,101 +98,101 @@ User‑data installs Apache and serves:
 Code
 Hello from your auto-healing web tier!
 5. Terraform Modules
-The project is structured into:
+The project is structured into reusable modules:
 
-#Code
+Code
 modules/
   network/
   load_balancer/
   compute/
-main.tf
-variables.tf
-outputs.tf
-Each module is isolated, reusable, and clearly parameterised.
-
-#Repository Structure
+  monitoring/
+  lambda/
+Repository Structure
 Code
 auto-healing-web-tier/
 │
 ├── main.tf
 ├── variables.tf
 ├── outputs.tf
+├── architecture-diagram.png
 ├── README.md
 │
 └── modules/
     ├── network/
-    │   ├── main.tf
-    │   ├── variables.tf
-    │   └── outputs.tf
-    │
     ├── load_balancer/
-    │   ├── main.tf
-    │   ├── variables.tf
-    │   └── outputs.tf
-    │
-    └── compute/
-        ├── main.tf
-        ├── variables.tf
-        └── outputs.tf
-#How to Deploy
+    ├── compute/
+    ├── monitoring/
+    └── lambda/
+How to Deploy
 Prerequisites
 Terraform v1.x
 
 AWS CLI configured (aws configure)
 
-IAM user with EC2, VPC, and ELB permissions
+IAM user with EC2, VPC, ELB, Lambda, SNS permissions
 
-#Steps to Run
-1. Initialise Terraform
+Steps to Run
+Initialise Terraform
+
 Code
 terraform init
-2. Preview the plan
+Preview the plan
+
 Code
 terraform plan
-3. Apply the infrastructure
+Apply the infrastructure
+
 Code
 terraform apply
-4. Validate N+1
+Validate N+1
 Go to:
 
+
 EC2 → Auto Scaling Groups → Instances
+You should see 2 running instances.
 
-You should see 2 running instances
-
-5. Validate auto‑healing
+Validate auto‑healing
 Terminate one instance:
 
 EC2 → Instances → Select → Instance state → Terminate
+ASG + Lambda will automatically launch a replacement.
 
-ASG will automatically launch a replacement.
+Test the ALB
+Visit the actual deployed DNS:
 
-6. Test the ALB
-Visit the output DNS:
+http://auto-healing-web-tier-alb-1834557822.ap-southeast-2.elb.amazonaws.com/
+Or, for future deployments:
 
-#Code
 http://<alb_dns_name>
+Outputs
+Output	Description
+alb_dns_name	Public DNS of the ALB
+asg_name	Auto Scaling Group name
+sns_topic_arn	SNS topic for notifications
+lambda_function_name	Auto‑healing Lambda
 
-#Assumptions
-1. Public subnets are acceptable for this exercise
 
-2. Apache is sufficient for static content
+Assumptions
+Public subnets are acceptable for this exercise
 
-3. No database or backend required
+Apache is sufficient for static content
 
-4. No private networking required
+No database or backend required
 
-5. No CI/CD pipeline required (optional)
+No private networking required
+
+No CI/CD pipeline required (optional)
 
 Estimated Monthly Cost (AUD)
 Component	Qty	Cost (AUD)
-EC2 t2.micro	2	~AUD 13.00
-ALB	1	~AUD 6.00
-Data transfer	minimal	~AUD 0.50
-Total		~AUD 19.50/month
+EC2 t2.micro	2	~13.00
+ALB	1	~6.00
+Data transfer	minimal	~0.50
+Total	—	~19.50/month
 
 
-#Optional Bonus (Not Implemented)
-Containerised version could include:
+Optional Bonus (Not Implemented)
+A containerised version could include:
 
 Dockerfile
 
@@ -181,15 +200,19 @@ Push to Docker Hub
 
 User‑data to pull and run container
 
-#Validation
+Validation
 All must‑have requirements have been met:
 
-1. Auto‑healing 
+Auto‑healing
 
-2. Self‑provisioning 
+Self‑provisioning
 
-3. N+1 capacity 
+N+1 capacity
 
-4. Static page 
+Static page
 
-5. Terraform modules 
+Terraform modules
+
+CloudWatch + Lambda + SNS remediation
+
+Updated architecture diagram
