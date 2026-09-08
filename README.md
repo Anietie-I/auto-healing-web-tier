@@ -96,19 +96,19 @@ Ensures two instances are always running behind the ALB.
 User‑data installs Apache and serves:
 
 Code
-Hello from your auto-healing web tier!
+Hello! Welcome to my Auto-healing web tier!
 5. Terraform Modules
 The project is structured into reusable modules:
 
-Code
 modules/
   network/
   load_balancer/
   compute/
   monitoring/
   lambda/
+  
 Repository Structure
-Code
+
 auto-healing-web-tier/
 │
 ├── main.tf
@@ -123,6 +123,7 @@ auto-healing-web-tier/
     ├── compute/
     ├── monitoring/
     └── lambda/
+    
 How to Deploy
 Prerequisites
 Terraform v1.x
@@ -147,9 +148,8 @@ terraform apply
 Validate N+1
 Go to:
 
-
 EC2 → Auto Scaling Groups → Instances
-You should see 2 running instances.
+There are 2 running instances.
 
 Validate auto‑healing
 Terminate one instance:
@@ -164,6 +164,7 @@ http://auto-healing-web-tier-alb-1834557822.ap-southeast-2.elb.amazonaws.com/
 Or, for future deployments:
 
 http://<alb_dns_name>
+
 Outputs
 Output	Description
 alb_dns_name	Public DNS of the ALB
@@ -215,4 +216,4 @@ Terraform modules
 
 CloudWatch + Lambda + SNS remediation
 
-Updated architecture diagram
+Architecture diagram
