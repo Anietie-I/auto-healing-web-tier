@@ -74,7 +74,7 @@ SNS notification
 
 Only healthy instances receive traffic.
 
-2. Self‑Provisioning (IaC Only)
+2. Self‑Provisioning
 Code
 terraform apply
 Builds the entire stack.
@@ -95,7 +95,6 @@ Ensures two instances are always running behind the ALB.
 4. Static Web Page
 User‑data installs Apache and serves:
 
-Code
 Hello! Welcome to my Auto-healing web tier!
 5. Terraform Modules
 The project is structured into reusable modules:
